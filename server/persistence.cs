@@ -130,7 +130,7 @@ function BLPrefUpdateTick() {
 
 	BLPrefCheckUpdates();
 
-	$BLPrefs::UpdateTick = schedule(1000, PreferenceGroup, BLPrefUpdateTick);
+	$BLPrefs::UpdateTick = schedule(15000, PreferenceGroup, BLPrefUpdateTick);
 }
 
 function BLPrefCheckUpdates() {
