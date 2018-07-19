@@ -27,6 +27,7 @@ if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
 		echo("[Support_Preferences] Preferences Reloading");
 		activatePackage(BLPrefCompatibilityPackage);
 		prunePrefs();
+		registerServerSettingPrefs();
 	}
 	return;
 } else if(!$BLPrefs::PreLoad) {

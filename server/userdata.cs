@@ -6,43 +6,54 @@ package BLPrefBL_IDPackage {
 		if($Pref::Server::bl_idRecords $= "") {
 			$Pref::Server::bl_idRecords = 0;
 		}
-		
+
 		%record = -1;
-		
+
 		// is this person's BL_ID already recorded?
 		for(%i = 0; %i < $Pref::Server::bl_idRecords; %i++) {
 			%bl_id = getFirstWord($Pref::Server::bl_idRecord[%i+1]);
-			
+
 			if(%client.getBLID() == %bl_id) {
 				// append to this record.
 				%record = %i+1;
 				break;
 			}
 		}
-		
+
 		if(%record == -1) {
 			// append to new record
 			%record = $Pref::Server::bl_idRecords++;
 		}
-		
+
 		$Pref::Server::bl_idRecord[%record] = %client.getBLID() SPC %client.getPlayerName();
-		
+
 		return Parent::autoAdminCheck(%client);
 	}
 };
 activatePackage(BLPrefBL_IDPackage);
 
 function serverCmdPopulateBL_IDListPlayers(%client) {
-	for(%i = 0; %i < $Pref::Server::bl_idRecords; %i++) {
+	if(isEventPending(%client._populateBlidSch))
+		return;
+
+	if(!%client._populateBlidListTime || %client._populateBlidListTime > $Sim::Time-5000) {
+		%client._populateBlidSch = schedule(10, %client, populateBL_IDListRecur, %client, 0);
+	}
+}
+
+function populateBL_IDListRecur(%client, %i) {
+	if(%i < $Pref::Server::bl_idRecords) {
 		%field = $Pref::Server::bl_idRecord[%i+1];
-		
+
 		%wc = getWordCount(%field);
-		
+
 		%bl_id = getWord(%field, 0);
 		%name = getWords(%field, 1, %wc-1);
-		
-		//echo(%field);
-		
+
 		commandToClient(%client, 'BL_IDListPlayer', %name, %bl_id);
+
+		%client._populateBlidSch = schedule(50, %client, populateBL_IDListRecur, %client, %i+1);
+	} else {
+		%client._populateBlidListTime = $Sim::Time;
 	}
 }
